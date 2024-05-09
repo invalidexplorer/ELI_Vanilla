@@ -3,13 +3,43 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css?family=Sora:400,700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link rel="stylesheet" href="popup.css">
+  <script src="popup.js"></script>
   <title>ELI Popup</title>
 </head>
 <body>
+  <div class="header">
+    <img src="icons/icon.png" alt="ELI Logo" class="logo">
+    <div class="header-buttons">
+      <span class="material-icons icon-button">refresh</span> <!-- Changed to use the correct icon name -->
+      <span class="material-icons icon-button">close</span>
+    </div>
+  </div>
   <h1>Welcome to ELI!</h1>
-  <input type="range" id="slider" min="1" max="100" value="50">
-  <button id="submitBtn">Submit</button>
-  <script src="popup.js"></script>
+  <p class="description">ELI helps you understand complex content easily with a customizable comprehension selector.</p>
+  <div class="toggle-container">
+    <button class="toggle rounded-toggle">Default</button>
+    <button class="toggle rounded-toggle grey-toggle">ADHD</button>
+  </div>
+  <div class="slider-container">
+    <p class="slider-label">Basic</p>
+    <input type="range" id="slider" class="slider" min="1" max="5" value="3">
+    <div class="emoji-track">
+      <span>👶</span><span>👦</span><span>🧑‍🎓</span><span>👨‍🏫</span><span>🧠</span>
+    </div>
+    <div class="text-description">
+      <p>Sample comprehension description</p>
+    </div>
+  </div>
+  <div class="action-buttons">
+    <button class="button rounded-button">Preview</button>
+    <button class="button rounded-button green-button">Rephrase</button>
+  </div>
+  <div class="save-option">
+    <input type="checkbox" id="save-option">
+    <label for="save-option">Save choice for next time?</label>
+  </div>
 </body>
 </html>

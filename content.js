@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const iframe = document.createElement("iframe");
   iframe.style.cssText =
-    "display: none; position: fixed; top: 180px; right: 20px; z-index: 100001; border: none;";
+    "display: none; position: fixed; top: 180px; right: 20px; z-index: 100001;  width: 450px; height: 600px; border: none;";
   document.body.appendChild(iframe);
 
   extensionIcon.addEventListener("click", function () {
