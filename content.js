@@ -1,28 +1,21 @@
-// Wait for the window to load fully
-window.onload = function () {
+document.addEventListener("DOMContentLoaded", function () {
   const extensionIcon = document.createElement("img");
   extensionIcon.src = chrome.runtime.getURL("icons/icon.png");
-  extensionIcon.style.cssText = `
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 100000; // High z-index to ensure visibility
-    cursor: pointer;
-    width: 200px;
-    height: 200px;
-    shadow: 0 0 8px rgba(0,0,0,0.5); // Optional: adds shadow for better visibility
-  `;
-
-  // Append the icon to the body
+  extensionIcon.style.cssText =
+    "position: fixed; top: 20px; right: 20px; z-index: 100000; cursor: pointer; width: 256px; height: 256px;";
   document.body.appendChild(extensionIcon);
 
-  // Add event listener for clicks to open the popup
   extensionIcon.addEventListener("click", function () {
-    chrome.runtime.sendMessage({ action: "openPopup" }, function (response) {
-      console.log(response.status);
-    });
+    fetch(chrome.runtime.getURL("popup.html"))
+      .then((response) => response.text())
+      .then((html) => {
+        const div = document.createElement("div");
+        div.innerHTML = html;
+        document.body.appendChild(div);
+      })
+      .catch((error) => console.error("Error loading the popup:", error));
   });
-};
+});
 
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   console.log("Slider Value:", message.sliderValue);
