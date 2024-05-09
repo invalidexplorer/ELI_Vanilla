@@ -2,18 +2,21 @@ document.addEventListener("DOMContentLoaded", function () {
   const extensionIcon = document.createElement("img");
   extensionIcon.src = chrome.runtime.getURL("icons/icon.png");
   extensionIcon.style.cssText =
-    "position: fixed; top: 20px; right: 20px; z-index: 100000; cursor: pointer; width: 256px; height: 256px;";
+    "position: fixed; top: 20px; right: 20px; z-index: 100000; cursor: pointer; width: 128px; height: 128px;";
   document.body.appendChild(extensionIcon);
 
+  const iframe = document.createElement("iframe");
+  iframe.style.cssText =
+    "display: none; position: fixed; top: 180px; right: 20px; z-index: 100001; border: none;";
+  document.body.appendChild(iframe);
+
   extensionIcon.addEventListener("click", function () {
-    fetch(chrome.runtime.getURL("popup.html"))
-      .then((response) => response.text())
-      .then((html) => {
-        const div = document.createElement("div");
-        div.innerHTML = html;
-        document.body.appendChild(div);
-      })
-      .catch((error) => console.error("Error loading the popup:", error));
+    iframe.style.display = iframe.style.display === "none" ? "block" : "none";
+    if (!iframe.src) {
+      // Setting the src of the iframe to your extension's HTML file
+      iframe.src = chrome.runtime.getURL("popup.html");
+      // Load the CSS and JS through the HTML file as usual
+    }
   });
 });
 
