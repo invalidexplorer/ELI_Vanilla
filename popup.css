@@ -160,6 +160,16 @@ h1 {
   margin-right: 10px;
 }
 
+.loading-screen {
+  display: none;
+  text-align: center;
+  font-size: 16px;
+  color: #606060;
+  padding: 20px;
+  background-color: #f6f6f6;
+  border-radius: 20px;
+}
+
 .preview-panel {
   background-color: #f6f6f6;
   border-radius: 20px;
