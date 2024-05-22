@@ -1,10 +1,19 @@
 body {
-  font-family: 'Sora', sans-serif;
+  font-family: "Sora", sans-serif;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.resizable {
   padding: 20px;
-  margin: 10px;
   background-color: #f4f4f4;
   width: 400px;
   height: 500px;
+  resize: both;
+  overflow: auto;
+  max-width: 450px;
+  max-height: 500px;
 }
 
 .header {
@@ -19,17 +28,23 @@ body {
 }
 
 .icon-button {
-  color: #606060;  
-  font-size: 24px;  
+  color: #606060;
+  font-size: 24px;
   cursor: pointer;
 }
 
 .header-buttons {
   display: flex;
   align-items: center;
-  gap: 10px;  
+  gap: 10px;
 }
 
+.divider {
+  border: none;
+  height: 1px;
+  background-color: #e0e0e0;
+  margin: 20px 0;
+}
 
 h1 {
   color: #333;
@@ -57,13 +72,13 @@ h1 {
   font-size: 16px;
   border-radius: 24px;
   cursor: pointer;
-  background-color: #117A6F;
-  color: white;
+  background-color: #f2f2f2;
+  color: #606060;
 }
 
-.grey-toggle {
-  background-color: #F2F2F2;
-  color: #606060;
+.toggle.active {
+  background-color: #117a6f;
+  color: white;
 }
 
 .slider-container {
@@ -77,12 +92,19 @@ h1 {
   font-weight: 700;
 }
 
+.subfont-description {
+  font-size: 12px;
+  color: #606060;
+  margin-top: 5px;
+  margin-bottom: 15px;
+}
+
 .slider {
   -webkit-appearance: none;
   width: 100%;
   height: 15px;
   border-radius: 10px;
-  background: linear-gradient(to right, #117A6F 50%, #D9D9D9 50%);
+  background: linear-gradient(to right, #117a6f 0%, #d9d9d9 0%);
   outline: none;
 }
 
@@ -104,27 +126,27 @@ h1 {
 
 .action-buttons {
   display: flex;
-  justify-content: center; /* Centers the buttons horizontally */
-  width: 100%; /* Sets the width of the container to full width */
+  justify-content: center;
+  width: 100%;
 }
 
 .button {
-  background-color: #FFFFFF;
-  border: 2px solid #117A6F;
-  color: #117A6F;
+  background-color: #ffffff;
+  border: 2px solid #117a6f;
+  color: #117a6f;
   padding: 10px 20px;
   text-align: center;
   display: inline-block;
   font-size: 16px;
-  margin: 10px 5px; /* Provides spacing between buttons */
+  margin: 10px 5px;
   cursor: pointer;
   border-radius: 20px;
-  width: 45%; /* Each button will take up 45% of the container width */
-  height: 56px; /* Ensures buttons have the same height */
+  width: 45%;
+  height: 56px;
 }
 
 .green-button {
-  background-color: #117A6F;
+  background-color: #117a6f;
   color: white;
 }
 
@@ -138,6 +160,22 @@ h1 {
   margin-right: 10px;
 }
 
-.text-description {
-  margin-top: 20px;
+.preview-panel {
+  background-color: #f6f6f6;
+  border-radius: 20px;
+  padding: 20px;
+  margin-top: 26px;
+  display: none; /* Initially hidden */
+}
+
+.preview-label {
+  font-weight: bold;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.preview-content {
+  font-weight: 300;
+  font-size: 14px;
+  color: #606060;
 }

@@ -10,36 +10,42 @@
   <title>ELI Popup</title>
 </head>
 <body>
-  <div class="header">
-    <img src="icons/icon.png" alt="ELI Logo" class="logo">
-    <div class="header-buttons">
-      <span class="material-icons icon-button">refresh</span> <!-- Changed to use the correct icon name -->
-      <span class="material-icons icon-button">close</span>
+  <div class="resizable">
+    <div class="header">
+      <img src="icons/icon.png" alt="ELI Logo" class="logo">
+      <div class="header-buttons">
+        <span class="material-icons icon-button refresh">refresh</span>
+        <span class="material-icons icon-button close">close</span>
+      </div>
     </div>
-  </div>
-  <h1>Welcome to ELI!</h1>
-  <p class="description">ELI helps you understand complex content easily with a customizable comprehension selector.</p>
-  <div class="toggle-container">
-    <button class="toggle rounded-toggle">Default</button>
-    <button class="toggle rounded-toggle grey-toggle">ADHD</button>
-  </div>
-  <div class="slider-container">
-    <p class="slider-label">Basic</p>
-    <input type="range" id="slider" class="slider" min="1" max="5" value="3">
-    <div class="emoji-track">
-      <span>👶</span><span>👦</span><span>🧑‍🎓</span><span>👨‍🏫</span><span>🧠</span>
+    <hr class="divider">
+    <h1>Welcome to ELI!</h1>
+    <p class="description">ELI helps you understand complex content easily with a customizable comprehension selector.</p>
+    <div class="toggle-container">
+      <button class="toggle active">Default</button>
+      <button class="toggle">ADHD</button>
     </div>
-    <div class="text-description">
-      <p>Sample comprehension description</p>
+    <div class="slider-container">
+      <p class="slider-label">Basic</p>
+      <p class="subfont-description">Building knowledge. Introduction to foundational ideas.</p>
+      <input type="range" id="slider" class="slider" min="1" max="5" value="1">
+      <div class="emoji-track">
+        <span>👶</span><span>👦</span><span>🧑‍🎓</span><span>👨‍🏫</span><span>🧠</span>
+      </div>
     </div>
-  </div>
-  <div class="action-buttons">
-    <button class="button rounded-button">Preview</button>
-    <button class="button rounded-button green-button">Rephrase</button>
-  </div>
-  <div class="save-option">
-    <input type="checkbox" id="save-option">
-    <label for="save-option">Save choice for next time?</label>
+    <hr class="divider">
+    <div class="action-buttons">
+      <button class="button rounded-button">Preview</button>
+      <button class="button rounded-button green-button">Rephrase</button>
+    </div>
+    <div class="save-option">
+      <input type="checkbox" id="save-option">
+      <label for="save-option">Save choice for next time?</label>
+    </div>
+    <div class="preview-panel" id="preview-panel">
+      <h2 class="preview-label">Preview</h2>
+      <p class="preview-content" id="preview-content">Cash flow is like checking how much money comes into your wallet (income) and how much goes out (expenses).</p>
+    </div>
   </div>
 </body>
 </html>
