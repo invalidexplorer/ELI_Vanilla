@@ -225,44 +225,17 @@ document.addEventListener("DOMContentLoaded", function () {
     const isADHD =
       document.querySelector(".toggle.active").textContent === "ADHD";
 
-    // Show fullscreen loading screen
-    fullscreenLoading.style.display = "block";
-    fullscreenContent.style.display = "none";
-    fullscreenPopup.style.display = "block";
-
-    // Perform POST request to get rephrased text
-    fetch("https://run.mocky.io/v3/8b38ed89-5967-44f0-8193-e8070b95afc0", {
-      // Replace this URL with your Mocky POST URL
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ level: sliderValue, url: url, isADHD: isADHD }),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then((data) => {
-        console.log("API Response:", data); // Add this line to log the API response
-        const markdown = data.rephrasedText;
-        if (markdown) {
-          fullscreenContent.innerHTML = markdownToHTML(markdown);
-        } else {
-          fullscreenContent.textContent = "No content received.";
-        }
-        fullscreenLoading.style.display = "none";
-        fullscreenContent.style.display = "block";
-      })
-      .catch((error) => {
-        console.error("Error fetching rephrased content:", error); // Add this line to log any errors
-        fullscreenContent.textContent = "Error loading rephrased content.";
-        fullscreenLoading.style.display = "none";
-        fullscreenContent.style.display = "block";
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+      chrome.tabs.sendMessage(tabs[0].id, {
+        action: "rephraseContent",
+        sliderValue: sliderValue,
+        url: tabs[0].url,
+        isADHD: isADHD,
       });
+    });
   }
+
+  rephraseButton.addEventListener("click", handleRephrase);
 
   function handleRefresh() {
     // Reset slider
