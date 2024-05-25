@@ -189,3 +189,100 @@ h1 {
   font-size: 14px;
   color: #606060;
 }
+
+.fullscreen-popup {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(17, 122, 111, 0.8);
+  z-index: 100001;
+  color: white;
+  overflow: auto;
+  padding: 20px;
+}
+
+.fullscreen-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-size: 36px;
+  cursor: pointer;
+}
+
+.fullscreen-content {
+  display: none;
+  padding: 20px;
+  background-color: white;
+  color: black;
+  border-radius: 10px;
+  max-width: 80%;
+  margin: 100px auto;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.fullscreen-loading {
+  display: none;
+  text-align: center;
+  padding: 20px;
+}
+
+.fullscreen-loading p {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.progress-bar {
+  width: 80%;
+  background-color: #ddd;
+  border-radius: 20px;
+  margin: 0 auto;
+}
+
+.progress {
+  width: 0;
+  height: 20px;
+  background-color: #117a6f;
+  border-radius: 20px;
+  animation: loading 2s infinite;
+}
+
+@keyframes loading {
+  0% {
+    width: 0;
+  }
+  50% {
+    width: 100%;
+  }
+  100% {
+    width: 0;
+  }
+}
+
+/* Additional styles for markdown content */
+.fullscreen-content h1,
+.fullscreen-content h2,
+.fullscreen-content h3 {
+  font-weight: bold;
+}
+
+.fullscreen-content p,
+.fullscreen-content li {
+  margin: 10px 0;
+}
+
+.fullscreen-content code {
+  background-color: #f4f4f4;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.fullscreen-content pre {
+  background-color: #f4f4f4;
+  padding: 10px;
+  border-radius: 4px;
+  overflow: auto;
+}

@@ -42,6 +42,9 @@ document.addEventListener("DOMContentLoaded", function () {
   const previewContent = document.getElementById("preview-content");
   const loadingScreen = document.getElementById("loading-screen");
   const saveOption = document.getElementById("save-option");
+  const fullscreenPopup = document.getElementById("fullscreen-popup");
+  const fullscreenContent = document.getElementById("fullscreen-content");
+  const fullscreenLoading = document.getElementById("fullscreen-loading");
 
   // Load saved settings
   const savedSliderValue = localStorage.getItem("sliderValue");
@@ -105,6 +108,12 @@ document.addEventListener("DOMContentLoaded", function () {
     closeIframe();
   });
 
+  document
+    .querySelector(".fullscreen-close")
+    .addEventListener("click", function () {
+      fullscreenPopup.style.display = "none";
+    });
+
   saveOption.addEventListener("change", function () {
     if (saveOption.checked) {
       localStorage.setItem("sliderValue", slider.value);
@@ -140,8 +149,8 @@ document.addEventListener("DOMContentLoaded", function () {
         previewPanel.style.display = "block";
         loadingScreen.style.display = "none";
       })
-      .catch(() => {
-        previewContent.textContent = "Error loading preview.";
+      .catch((e) => {
+        previewContent.textContent = `Error loading preview. ${e}`;
         previewPanel.style.display = "block";
         loadingScreen.style.display = "none";
       });
@@ -150,12 +159,109 @@ document.addEventListener("DOMContentLoaded", function () {
   function handleRephrase() {
     console.log("Rephrase clicked");
     const sliderValue = document.getElementById("slider").value;
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      const message = { sliderValue, url: url };
+    const isADHD =
+      document.querySelector(".toggle.active").textContent === "ADHD";
 
-      // Send message to the content script
-      chrome.tabs.sendMessage(tabs[0].id, message);
-    });
+    // Show fullscreen loading screen
+    fullscreenLoading.style.display = "block";
+    fullscreenContent.style.display = "none";
+    fullscreenPopup.style.display = "block";
+
+    // Perform POST request to get rephrased text
+    fetch("https://run.mocky.io/v3/8b38ed89-5967-44f0-8193-e8070b95afc0", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ level: sliderValue, url: url, isADHD: isADHD }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log("API Response:", data); // Add this line to log the API response
+        const markdown = data.rephrasedText;
+        if (markdown) {
+          const converter = new showdown.Converter();
+          const htmlContent = converter.makeHtml(markdown);
+          fullscreenContent.innerHTML = htmlContent;
+          // Apply syntax highlighting
+          hljs.highlightAll();
+        } else {
+          fullscreenContent.textContent = "No content received.";
+        }
+        fullscreenLoading.style.display = "none";
+        fullscreenContent.style.display = "block";
+      })
+      .catch((error) => {
+        console.error("Error fetching rephrased content:", error); // Add this line to log any errors
+        fullscreenContent.textContent = "Error loading rephrased content.";
+        fullscreenLoading.style.display = "none";
+        fullscreenContent.style.display = "block";
+      });
+  }
+  function markdownToHTML(markdown) {
+    if (!markdown) {
+      console.error("Invalid markdown content:", markdown); // Add this line to log invalid markdown content
+      return "";
+    }
+    // Simple markdown to HTML converter
+    return markdown
+      .replace(/^### (.*$)/gim, "<h3>$1</h3>")
+      .replace(/^## (.*$)/gim, "<h2>$1</h2>")
+      .replace(/^# (.*$)/gim, "<h1>$1</h1>")
+      .replace(/^\> (.*$)/gim, "<blockquote>$1</blockquote>")
+      .replace(/\*\*(.*)\*\*/gim, "<b>$1</b>")
+      .replace(/\*(.*)\*/gim, "<i>$1</i>")
+      .replace(/\n$/gim, "<br />");
+  }
+
+  function handleRephrase() {
+    console.log("Rephrase clicked");
+    const sliderValue = document.getElementById("slider").value;
+    const isADHD =
+      document.querySelector(".toggle.active").textContent === "ADHD";
+
+    // Show fullscreen loading screen
+    fullscreenLoading.style.display = "block";
+    fullscreenContent.style.display = "none";
+    fullscreenPopup.style.display = "block";
+
+    // Perform POST request to get rephrased text
+    fetch("https://run.mocky.io/v3/8b38ed89-5967-44f0-8193-e8070b95afc0", {
+      // Replace this URL with your Mocky POST URL
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ level: sliderValue, url: url, isADHD: isADHD }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log("API Response:", data); // Add this line to log the API response
+        const markdown = data.rephrasedText;
+        if (markdown) {
+          fullscreenContent.innerHTML = markdownToHTML(markdown);
+        } else {
+          fullscreenContent.textContent = "No content received.";
+        }
+        fullscreenLoading.style.display = "none";
+        fullscreenContent.style.display = "block";
+      })
+      .catch((error) => {
+        console.error("Error fetching rephrased content:", error); // Add this line to log any errors
+        fullscreenContent.textContent = "Error loading rephrased content.";
+        fullscreenLoading.style.display = "none";
+        fullscreenContent.style.display = "block";
+      });
   }
 
   function handleRefresh() {

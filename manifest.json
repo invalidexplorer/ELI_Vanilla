@@ -2,13 +2,18 @@
   "manifest_version": 3,
   "name": "ELI",
   "version": "1.0",
+  "description": "ELI helps you understand complex content easily with a customizable comprehension selector.",
   "permissions": ["activeTab", "storage", "tabs"],
   "host_permissions": [
-    "*://*.medium.com/*"  
+    "*://*.medium.com/*"
   ],
   "action": {
     "default_popup": "popup.html",
-    "default_icon": "icons/icon.png"
+    "default_icon": {
+      "16": "icons/icon.png",
+      "48": "icons/icon.png",
+      "128": "icons/icon.png"
+    }
   },
   "icons": {
     "16": "icons/icon.png",
@@ -24,8 +29,19 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["popup.html", "popup.js", "popup.css", "icons/*"],
-      "matches": ["*://*.medium.com/*"]
+      "resources": [
+        "popup.html", 
+        "popup.js", 
+        "popup.css", 
+        "icons/*", 
+        "libs/showdown.min.js", 
+        "libs/highlight.min.js", 
+        "libs/github.css"
+      ],
+      "matches": ["<all_urls>"]
     }
-  ]
+  ],
+  "background": {
+    "service_worker": "background.js"
+  }
 }
