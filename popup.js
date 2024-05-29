@@ -1,6 +1,9 @@
 let url = null;
+let activeTabId = null;
+
 chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-  url = tabs[0].url; // URL of the current tab
+  url = tabs[0].url;
+  activeTabId = tabs[0].id; // Store the active tab's ID
 });
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -46,7 +49,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const fullscreenContent = document.getElementById("fullscreen-content");
   const fullscreenLoading = document.getElementById("fullscreen-loading");
 
-  // Load saved settings
   const savedSliderValue = localStorage.getItem("sliderValue");
   if (savedSliderValue) {
     slider.value = savedSliderValue;
@@ -56,7 +58,6 @@ document.addEventListener("DOMContentLoaded", function () {
       background: linear-gradient(to right, #117A6F ${percentage}%, #D9D9D9 ${percentage}%);
     }`;
   } else {
-    // Set initial values
     updateSliderUI(levels[0]);
   }
 
@@ -130,30 +131,45 @@ document.addEventListener("DOMContentLoaded", function () {
   function handlePreview() {
     console.log("Preview clicked");
     const sliderValue = document.getElementById("slider").value;
-
-    // Show loading screen
-    loadingScreen.style.display = "block";
-    previewPanel.style.display = "none";
-
-    // Perform POST request to get preview text for the current level
-    fetch("https://run.mocky.io/v3/4a45c502-95e3-4e8d-9adc-fc6b545a35bc", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    const isADHD =
+      document.querySelector(".toggle.active").textContent === "ADHD";
+    const url = window.location.href;
+    chrome.scripting.executeScript(
+      {
+        target: { tabId: activeTabId },
+        func: () => document.documentElement.outerHTML,
       },
-      body: JSON.stringify({ level: sliderValue, url: url }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        previewContent.textContent = data[sliderValue].previewText;
-        previewPanel.style.display = "block";
-        loadingScreen.style.display = "none";
-      })
-      .catch((e) => {
-        previewContent.textContent = `Error loading preview. ${e}`;
-        previewPanel.style.display = "block";
-        loadingScreen.style.display = "none";
-      });
+      (result) => {
+        const htmlContent = result[0].result;
+        loadingScreen.style.display = "block";
+        previewPanel.style.display = "none";
+
+        fetch("https://run.mocky.io/v3/4a45c502-95e3-4e8d-9adc-fc6b545a35bc", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            level: sliderValue,
+            url: url,
+            html: htmlContent,
+            isADHD: isADHD,
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(htmlContent);
+            previewContent.textContent = data[sliderValue].previewText;
+            previewPanel.style.display = "block";
+            loadingScreen.style.display = "none";
+          })
+          .catch((e) => {
+            previewContent.textContent = `Error loading preview. ${e}`;
+            previewPanel.style.display = "block";
+            loadingScreen.style.display = "none";
+          });
+      }
+    );
   }
 
   function handleRephrase() {
@@ -162,83 +178,30 @@ document.addEventListener("DOMContentLoaded", function () {
     const isADHD =
       document.querySelector(".toggle.active").textContent === "ADHD";
 
-    // Show fullscreen loading screen
-    fullscreenLoading.style.display = "block";
-    fullscreenContent.style.display = "none";
-    fullscreenPopup.style.display = "block";
-
-    // Perform POST request to get rephrased text
-    fetch("https://run.mocky.io/v3/8b38ed89-5967-44f0-8193-e8070b95afc0", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    chrome.scripting.executeScript(
+      {
+        target: { tabId: activeTabId },
+        func: () => document.documentElement.outerHTML,
       },
-      body: JSON.stringify({ level: sliderValue, url: url, isADHD: isADHD }),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then((data) => {
-        console.log("API Response:", data); // Add this line to log the API response
-        const markdown = data.rephrasedText;
-        if (markdown) {
-          const converter = new showdown.Converter();
-          const htmlContent = converter.makeHtml(markdown);
-          fullscreenContent.innerHTML = htmlContent;
-          // Apply syntax highlighting
-          hljs.highlightAll();
-        } else {
-          fullscreenContent.textContent = "No content received.";
-        }
-        fullscreenLoading.style.display = "none";
-        fullscreenContent.style.display = "block";
-      })
-      .catch((error) => {
-        console.error("Error fetching rephrased content:", error); // Add this line to log any errors
-        fullscreenContent.textContent = "Error loading rephrased content.";
-        fullscreenLoading.style.display = "none";
-        fullscreenContent.style.display = "block";
-      });
+      (result) => {
+        const htmlContent = result[0].result;
+        chrome.tabs.query(
+          { active: true, currentWindow: true },
+          function (tabs) {
+            chrome.tabs.sendMessage(tabs[0].id, {
+              action: "rephraseContent",
+              sliderValue: sliderValue,
+              url: tabs[0].url,
+              isADHD: isADHD,
+              html: htmlContent,
+            });
+          }
+        );
+      }
+    );
   }
-  function markdownToHTML(markdown) {
-    if (!markdown) {
-      console.error("Invalid markdown content:", markdown); // Add this line to log invalid markdown content
-      return "";
-    }
-    // Simple markdown to HTML converter
-    return markdown
-      .replace(/^### (.*$)/gim, "<h3>$1</h3>")
-      .replace(/^## (.*$)/gim, "<h2>$1</h2>")
-      .replace(/^# (.*$)/gim, "<h1>$1</h1>")
-      .replace(/^\> (.*$)/gim, "<blockquote>$1</blockquote>")
-      .replace(/\*\*(.*)\*\*/gim, "<b>$1</b>")
-      .replace(/\*(.*)\*/gim, "<i>$1</i>")
-      .replace(/\n$/gim, "<br />");
-  }
-
-  function handleRephrase() {
-    console.log("Rephrase clicked");
-    const sliderValue = document.getElementById("slider").value;
-    const isADHD =
-      document.querySelector(".toggle.active").textContent === "ADHD";
-
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      chrome.tabs.sendMessage(tabs[0].id, {
-        action: "rephraseContent",
-        sliderValue: sliderValue,
-        url: tabs[0].url,
-        isADHD: isADHD,
-      });
-    });
-  }
-
-  rephraseButton.addEventListener("click", handleRephrase);
 
   function handleRefresh() {
-    // Reset slider
     slider.value = 1;
     updateSliderUI(levels[0]);
     let percentage = 0;
@@ -246,19 +209,15 @@ document.addEventListener("DOMContentLoaded", function () {
       background: linear-gradient(to right, #117A6F ${percentage}%, #D9D9D9 ${percentage}%);
     }`;
 
-    // Reset toggle buttons
     toggleButtons.forEach((btn) => btn.classList.remove("active"));
     toggleButtons[0].classList.add("active");
 
-    // Reset description
     const description = document.querySelector(".description");
     description.textContent =
       "ELI helps you understand complex content easily with a customizable comprehension selector.";
 
-    // Hide preview panel
     previewPanel.style.display = "none";
 
-    // Uncheck and remove saved slider value
     saveOption.checked = false;
     localStorage.removeItem("sliderValue");
   }
@@ -266,8 +225,6 @@ document.addEventListener("DOMContentLoaded", function () {
   function closeIframe() {
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       const message = { action: "toggleIframe" };
-
-      // Send message to the content script
       chrome.tabs.sendMessage(tabs[0].id, message);
     });
   }

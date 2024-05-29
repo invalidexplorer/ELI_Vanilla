@@ -3,7 +3,7 @@
   "name": "ELI",
   "version": "1.0",
   "description": "ELI helps you understand complex content easily with a customizable comprehension selector.",
-  "permissions": ["activeTab", "storage", "tabs"],
+  "permissions": ["activeTab", "storage", "tabs", "scripting"],
   "host_permissions": [
     "*://*.medium.com/*"
   ],
@@ -30,11 +30,11 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "popup.html", 
-        "popup.js", 
-        "popup.css", 
+        "popup.html",
+        "popup.js",
+        "popup.css",
         "icons/*",
-        "lib/marked.min.js"
+        "libs/marked.min.js"
       ],
       "matches": ["<all_urls>"]
     }

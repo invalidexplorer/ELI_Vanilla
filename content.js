@@ -2,7 +2,7 @@ const rephraseAPICall =
   "https://run.mocky.io/v3/b3df34a9-d0d7-40ea-9686-36f2e3da4142";
 const iframe = document.createElement("iframe");
 iframe.style.cssText =
-  "display: none; position: fixed; top: 180px; right: 20px; z-index: 100001;  width: 450px; height: 600px; border: none;";
+  "display: none; position: fixed; top: 180px; right: 20px; z-index: 100001; width: 450px; height: 600px; border: none; resize: both; overflow: auto;";
 
 document.addEventListener("DOMContentLoaded", function () {
   const extensionIcon = document.createElement("img");
@@ -16,44 +16,41 @@ document.addEventListener("DOMContentLoaded", function () {
   extensionIcon.addEventListener("click", function () {
     iframe.style.display = iframe.style.display === "none" ? "block" : "none";
     if (!iframe.src) {
-      // Setting the src of the iframe to your extension's HTML file
       iframe.src = chrome.runtime.getURL("popup.html");
-      // Load the CSS and JS through the HTML file as usual
     }
   });
+
+  injectFullscreenPopup();
 });
 
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   if (message.action === "toggleIframe") {
     iframe.style.display = iframe.style.display === "none" ? "block" : "none";
     if (!iframe.src) {
-      // Setting the src of the iframe to your extension's HTML file
       iframe.src = chrome.runtime.getURL("popup.html");
-      // Load the CSS and JS through the HTML file as usual
     }
   }
 
   console.log("Slider Value:", message.sliderValue);
   console.log("Website URL:", message.url);
-  injectFullscreenPopup();
+  console.log("Website HTML:", message.html);
 });
 
-// Inject fullscreen popup HTML into the webpage
 function injectFullscreenPopup() {
   const popupHTML = `
-  <div id="fullscreen-popup" class="fullscreen-popup">
-    <div class="fullscreen-content" id="fullscreen-content"></div>
-    <div id="fullscreen-loading" class="fullscreen-loading">
-      <p>Rephrasing....</p>
-      <div class="progress-bar">
-        <div class="progress"></div>
+    <div id="fullscreen-popup" class="fullscreen-popup">
+      <div class="fullscreen-content" id="fullscreen-content"></div>
+      <div id="fullscreen-loading" class="fullscreen-loading">
+        <p>Rephrasing....</p>
+        <div class="progress-bar">
+          <div class="progress"></div>
+        </div>
       </div>
+      <div class="fullscreen-close" title="Close">
+      <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 96 960 960" width="48"><path d="M480 736 215 1000q-12 12-29.5 12T156 1000q-12-12-12-29.5t12-29.5l264-264-264-264q-12-12-12-29.5t12-29.5q12-12 29.5-12T215 384l265 264 264-264q12-12 29.5-12t29.5 12q12 12 12 29.5t-12 29.5L540 672l264 264q12 12 12 29.5t-12 29.5q-12 12-29.5 12T739 1000L480 736Z"/></svg>
     </div>
-    <div class="fullscreen-close" title="Close">
-    <svg xmlns="http://www.w3.org/2000/svg" height="48" viewBox="0 96 960 960" width="48"><path d="M480 736 215 1000q-12 12-29.5 12T156 1000q-12-12-12-29.5t12-29.5l264-264-264-264q-12-12-12-29.5t12-29.5q12-12 29.5-12T215 384l265 264 264-264q12-12 29.5-12t29.5 12q12 12 12 29.5t-12 29.5L540 672l264 264q12 12 12 29.5t-12 29.5q-12 12-29.5 12T739 1000L480 736Z"/></svg>
   </div>
-    </div>
-`;
+  `;
 
   const popupStyle = `
   .fullscreen-popup {
@@ -127,46 +124,54 @@ function injectFullscreenPopup() {
       width: 0;
     }
   }
-`;
+  `;
 
-  const style = document.createElement("style");
-  style.textContent = popupStyle;
-  document.head.appendChild(style);
+  document.addEventListener("DOMContentLoaded", function () {
+    const style = document.createElement("style");
+    style.textContent = popupStyle;
+    document.head.appendChild(style);
 
-  const div = document.createElement("div");
-  div.innerHTML = popupHTML;
-  document.body.appendChild(div);
+    const div = document.createElement("div");
+    div.innerHTML = popupHTML;
+    document.body.appendChild(div);
 
-  // Add event listener for close button
-  document
-    .querySelector(".fullscreen-close")
-    .addEventListener("click", function () {
-      document.getElementById("fullscreen-popup").style.display = "none";
-    });
+    const closeButton = document.querySelector(".fullscreen-close");
+    if (closeButton) {
+      closeButton.addEventListener("click", function () {
+        document.getElementById("fullscreen-popup").style.display = "none";
+      });
+    }
+  });
 }
 
-// Listen for messages from the popup script
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   if (message.action === "rephraseContent") {
-    const { sliderValue, url, isADHD } = message;
+    const { sliderValue, url, isADHD, html } = message;
 
-    // Show fullscreen loading screen
     const fullscreenPopup = document.getElementById("fullscreen-popup");
     const fullscreenContent = document.getElementById("fullscreen-content");
     const fullscreenLoading = document.getElementById("fullscreen-loading");
+
+    if (!fullscreenPopup || !fullscreenContent || !fullscreenLoading) {
+      console.error("Fullscreen popup elements are missing!");
+      return;
+    }
 
     fullscreenLoading.style.display = "block";
     fullscreenContent.style.display = "none";
     fullscreenPopup.style.display = "block";
 
-    // Perform POST request to get rephrased text
     fetch(rephraseAPICall, {
-      // Replace this URL with your Mocky POST URL
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ level: sliderValue, url: url, isADHD: isADHD }),
+      body: JSON.stringify({
+        level: sliderValue,
+        url: url,
+        isADHD: isADHD,
+        html: html,
+      }),
     })
       .then((response) => {
         if (!response.ok) {
@@ -175,7 +180,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         return response.json();
       })
       .then((data) => {
-        console.log("API Response:", data); // Add this line to log the API response
+        console.log("API Response:", data);
         const markdown = data.rephrasedText;
         if (markdown) {
           fullscreenContent.innerHTML = marked.parse(markdown);
@@ -186,7 +191,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
         fullscreenContent.style.display = "block";
       })
       .catch((error) => {
-        console.error("Error fetching rephrased content:", error); // Add this line to log any errors
+        console.error("Error fetching rephrased content:", error);
         fullscreenContent.textContent = "Error loading rephrased content.";
         fullscreenLoading.style.display = "none";
         fullscreenContent.style.display = "block";
@@ -194,4 +199,4 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
   }
 });
 
-// Inject the fullscreen popup when the content script is loaded
+injectFullscreenPopup();
